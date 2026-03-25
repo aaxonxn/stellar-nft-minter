@@ -76,19 +76,19 @@ Check out the live robust deployment securely operating flawlessly over global C
 ## 📸 Screenshots
 
 ### 🔐 1. Wallet Not Connected (Landing Page)
-![Wallet Not Connected](./public/screens/screen1-wallet.png)
+![Wallet Not Connected](./assets/screen1-wallet.png)
 
 ### 🔗 2. Wallet Connected
-![Wallet Connected](./public/screens/screen2-connected.png)
+![Wallet Connected](./assets/screen2-connected.png)
 
 ### 🪙 3. Minting NFT (Freighter + Processing)
-![Minting NFT](./public/screens/screen3-minting.png)
+![Minting NFT](./assets/screen3-minting.png)
 
 ### ✅ 4. NFT Minted Successfully
-![Mint Success](./public/screens/screen4-success.png)
+![Mint Success](./assets/screen4-success.png)
 
 ### 🖼 5. NFT Gallery (Persistent View)
-![NFT Gallery](./public/screens/screen5-gallery.png)
+![NFT Gallery](./assets/screen5-gallery.png)
 
 This application demonstrates the complete lifecycle of minting an NFT on the Stellar testnet, from wallet connection to final asset display.
 
