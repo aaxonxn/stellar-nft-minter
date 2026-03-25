@@ -27,6 +27,11 @@ Unlike standard EVM blockchains reliant on explicitly complex smart contracts en
 2. **User Target Trustline**: Leveraging safely your Freighter Wallet, a single localized `ChangeTrust` transaction explicitly signals the recipient accepts securely the newly structured token applying a strict `limit: "1"`.
 3. **Execution & Final Immutable Lock**: Once the user safely trusts securely the item locally, the Issuer successfully transmits a synchronized `Payment` explicitly moving exactly `1` single strict unit directly to your Freighter public key. Identically simultaneously, the Issuer successfully invokes structural options completely freezing its own authority natively via `masterWeight: 0` eternally locking the final global network total supply flawlessly at `1`. True immutability attained!
 
+## 📂 Project Structure
+
+- `/frontend` → React dApp (React 19 ecosystem handling UI, Freighter wallets, and raw transaction building loops natively).
+- `/contracts` → Traditional smart contract placeholders strictly documenting robust localized native network mapping omitting Soroban executions entirely explicitly!
+
 ## 🚀 Setup Instructions
 
 1. **Clone the repository**:
@@ -35,17 +40,22 @@ Unlike standard EVM blockchains reliant on explicitly complex smart contracts en
    cd stellar-nft-minter
    ```
 
-2. **Install core dependencies**:
+2. **Navigate natively into the frontend engine**:
+   ```bash
+   cd frontend
+   ```
+
+3. **Install core decentralized dependencies**:
    ```bash
    npm install
    ```
 
-3. **Start the local Vite development server**:
+4. **Start the local Vite development server**:
    ```bash
    npm run dev
    ```
 
-4. **Verify your Browser setup**: Make absolute sure you have the official Stellar **Freighter Wallet Browser Extension** cleanly installed locally uniquely shifted explicitly onto the `Testnet` network pipeline globally configured optimally loaded locally with preliminary free network base reserve XLMs!
+5. **Verify your Browser setup**: Make absolute sure you have the official Stellar **Freighter Wallet Browser Extension** cleanly installed locally uniquely shifted explicitly onto the `Testnet` network pipeline globally configured optimally loaded locally with preliminary free network base reserve XLMs!
 
 ## 🧪 Test Instructions
 
