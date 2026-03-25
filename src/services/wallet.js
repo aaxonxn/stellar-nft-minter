@@ -1,35 +1,56 @@
-import { isAllowed, setAllowed, getPublicKey, isConnected } from "@stellar/freighter-api";
+import { requestAccess, isAllowed, setAllowed, getPublicKey, isConnected } from "@stellar/freighter-api";
 
 const STORAGE_KEY = "stellar_app_pubkey";
 
 export const connectWallet = async () => {
   try {
-    const connected = await isConnected();
-    if (!connected) {
+    let connectedRes;
+    try {
+      connectedRes = await isConnected();
+    } catch(e) { }
+    
+    const installed = typeof connectedRes === 'object' ? connectedRes.isConnected : !!connectedRes;
+    
+    if (!installed) {
       return { success: false, error: "Freighter wallet is not installed or available." };
     }
     
-    // Check if user has already granted permission
-    let allowed = await isAllowed();
+    // Modern Freighter API v6 approach
+    if (typeof requestAccess === 'function') {
+      const accessRes = await requestAccess();
+      const addr = typeof accessRes === 'object' ? (accessRes.address || accessRes.publicKey) : accessRes;
+      const err = typeof accessRes === 'object' ? accessRes.error : null;
+      if (err || !addr) {
+        return { success: false, error: err || "User rejected Freighter access." };
+      }
+      localStorage.setItem(STORAGE_KEY, addr);
+      return { success: true, publicKey: addr };
+    }
+    
+    // Fallback to older Freighter API style
+    const allowedRes = await isAllowed();
+    let allowed = typeof allowedRes === 'object' ? allowedRes.isAllowed : allowedRes;
+    
     if (!allowed) {
-      // Prompt freighter permission
-      await setAllowed();
-      allowed = await isAllowed();
+      const setAllowedRes = await setAllowed();
+      allowed = typeof setAllowedRes === 'object' ? setAllowedRes.isAllowed : setAllowedRes;
       if (!allowed) {
         return { success: false, error: "User rejected Freighter access." };
       }
     }
     
-    // Get public key
-    const publicKey = await getPublicKey();
+    const pkRes = await getPublicKey();
+    const publicKey = typeof pkRes === 'object' ? (pkRes.publicKey || pkRes.address) : pkRes;
     
-    // Store public key in local storage to keep user logged in
+    if (!publicKey) {
+      return { success: false, error: "Could not retrieve public key." };
+    }
+    
     localStorage.setItem(STORAGE_KEY, publicKey);
-    
     return { success: true, publicKey };
   } catch (error) {
     console.error("Wallet Connection Error:", error);
-    return { success: false, error: "An error occurred while connecting to your wallet." };
+    return { success: false, error: `Freighter error: ${error.message || String(error)}` };
   }
 };
 
