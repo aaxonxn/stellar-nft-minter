@@ -12,7 +12,7 @@ pub enum DataKey {
 #[contractimpl]
 impl NftContract {
     /// Mints a new NFT by storing its name mapped directly to the owner's address.
-    pub fn mint_nft(env: Env, name: String, owner: Address) {
+    pub fn mint_nft(env: Env, owner: Address, name: String) {
         // Enforce that the transaction is authorized defensively by the given owner
         owner.require_auth();
         
