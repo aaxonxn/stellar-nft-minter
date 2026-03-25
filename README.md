@@ -59,7 +59,7 @@ npm test
 ## 🌍 Deployment
 
 Check out the live robust deployment securely operating flawlessly over global CDN endpoints here:
-👉 **[Vercel Live Deployment Link Parameter Placeholder - e.g. https://stellar-nft-minter.vercel.app]**
+👉 **[Live Vercel Project](https://stellar-nft-minter.vercel.app/)**
 
 ---
 
