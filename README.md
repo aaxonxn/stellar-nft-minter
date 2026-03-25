@@ -27,6 +27,11 @@ Unlike standard EVM blockchains reliant on explicitly complex smart contracts en
 2. **User Target Trustline**: Leveraging safely your Freighter Wallet, a single localized `ChangeTrust` transaction explicitly signals the recipient accepts securely the newly structured token applying a strict `limit: "1"`.
 3. **Execution & Final Immutable Lock**: Once the user safely trusts securely the item locally, the Issuer successfully transmits a synchronized `Payment` explicitly moving exactly `1` single strict unit directly to your Freighter public key. Identically simultaneously, the Issuer successfully invokes structural options completely freezing its own authority natively via `masterWeight: 0` eternally locking the final global network total supply flawlessly at `1`. True immutability attained!
 
+## ⛓️ Smart Contract
+
+This project explicitly includes a structured Soroban smart contract exactly located natively in `/contracts/nft_contract`.
+It neatly demonstrates clean advanced NFT minting and retrieval specifically utilizing persistent on-chain storage constraints seamlessly!
+
 ## 📂 Project Structure
 
 - `/frontend` → React dApp (React 19 ecosystem handling UI, Freighter wallets, and raw transaction building loops natively).

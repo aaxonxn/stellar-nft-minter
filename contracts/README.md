@@ -1,13 +1,11 @@
 # Stellar Smart Contracts Architecture
 
-This directory serves as the standard organizational anchor for blockchain smart contracts inside typical EVM-compatible monolithic repositories natively. 
+This directory serves as the traditional location for blockchain smart contracts seamlessly inside our Monorepo context!
 
-However, **this project explicitly utilizes the lightning-fast native "Stellar Classic" architecture** and strictly does not require complex or structurally heavy Soroban smart contracts!
+## Soroban Smart Contract included!
+This project actively includes a pristine Soroban smart contract directly located down inside `/contracts/nft_contract`.
+It structurally demonstrates true **on-chain logic** using exactly the official Soroban `soroban-sdk` natively.
 
-## How our NFT Simulation Works without Soroban
-Instead of deploying custom virtual code into a decentralized remote virtual machine execution layer, we strictly utilize the foundational native primitives natively engineered exclusively into the Stellar Network protocols:
-- **Custom Assets**: Utilizing dynamically constructed unique Keypair identifiers rigorously capping global distribution limits structurally mapped to a `Supply: 1`.
-- **Trustlines**: Resolving a single localized explicit `ChangeTrust` network authorization exclusively mapping limits bound specifically to your dynamic target.
-- **Payments & Master Keys**: Broadcasting flawlessly precisely `1` immutable sequence `Payment` before immediately destroying account authority structurally via `masterWeight: 0`, enforcing true immutability over the final network supply mathematically globally!
-
-You can natively track all deeply nested custom transaction loops safely operating inside `/frontend/src/services/stellar.js`!
+- **NFT Storage**: It utilizes persistent on-chain Map vectors (`Map<Address, Vec<String>>`) seamlessly allowing true execution bounds mapping localized names strictly to their originating owners securely!
+- **Frontend Engine Mapping**: Note that explicitly running inside the `/frontend` directory, the primary UI currently utilizes standard Stellar classic Custom Asset transactions explicitly generating Trustlines and Payments identically mapped wrapping a traditional `Supply: 1` constraint entirely flawlessly. 
+- **The Best of Both Worlds**: Together this cleanly demonstrates how basic immutable ledger properties scale manually while highlighting exact methods of extending these configurations flawlessly using advanced standalone Soroban bindings locally inside the contracts!
