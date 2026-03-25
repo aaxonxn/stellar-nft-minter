@@ -3,18 +3,45 @@ import ConnectWallet from './components/ConnectWallet';
 import WalletDisplay from './components/WalletDisplay';
 import MintForm from './components/MintForm';
 import NFTGallery from './components/NFTGallery';
-import { fetchBalance } from './services/stellar';
+import { fetchBalance, fetchNFTs } from './services/stellar';
 import { getStoredPublicKey, disconnectWallet } from './services/wallet';
 import { Rocket, LogOut } from 'lucide-react';
+
+const METADATA_KEY = 'stellar_nft_metadata';
+
+const getMetadataFromStorage = () => {
+  try {
+    const data = localStorage.getItem(METADATA_KEY);
+    return data ? JSON.parse(data) : [];
+  } catch { return []; }
+};
+
+const saveMetadataToStorage = (nft) => {
+  const existing = getMetadataFromStorage();
+  const newEntry = {
+    asset_code: nft.assetCode,
+    issuer: nft.issuer,
+    name: nft.data.name,
+    description: nft.data.description,
+    imageUrl: nft.data.imageUrl
+  };
+  
+  if (!existing.some(m => m.asset_code === newEntry.asset_code && m.issuer === newEntry.issuer)) {
+    localStorage.setItem(METADATA_KEY, JSON.stringify([newEntry, ...existing]));
+  }
+};
 
 function App() {
   const [publicKey, setPublicKey] = useState(null);
   const [balance, setBalance] = useState('0.0000000');
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
   const [sessionNFTs, setSessionNFTs] = useState([]);
+  const [fetchedAssets, setFetchedAssets] = useState([]);
+  const [isAssetsLoading, setIsAssetsLoading] = useState(false);
 
   const handleMintSuccess = (nft) => {
     setSessionNFTs(prev => [nft, ...prev]);
+    saveMetadataToStorage(nft);
   };
 
   useEffect(() => {
@@ -30,21 +57,37 @@ function App() {
 
   useEffect(() => {
     if (publicKey) {
-      const getBalance = async () => {
+      const fetchWalletData = async () => {
         setIsBalanceLoading(true);
+        setIsAssetsLoading(true);
         try {
           const bal = await fetchBalance(publicKey);
           setBalance(bal);
+          
+          const rawAssets = await fetchNFTs(publicKey);
+          const metadataStore = getMetadataFromStorage();
+          
+          const mergedAssets = rawAssets.map(asset => {
+            const meta = metadataStore.find(m => m.asset_code === asset.asset_code && m.issuer === asset.asset_issuer);
+            if (meta) {
+              return { ...asset, metadata: meta };
+            }
+            return asset;
+          });
+          
+          setFetchedAssets(mergedAssets);
         } catch (err) {
-          console.error("Balance fetch error:", err);
+          console.error("Data fetch error:", err);
           setBalance('Error');
         } finally {
           setIsBalanceLoading(false);
+          setIsAssetsLoading(false);
         }
       };
-      getBalance();
+      fetchWalletData();
     } else {
       setBalance('0.0000000');
+      setFetchedAssets([]);
     }
   }, [publicKey]);
 
@@ -108,7 +151,7 @@ function App() {
             <MintForm publicKey={publicKey} onMintSuccess={handleMintSuccess} />
           </div>
 
-          <NFTGallery nfts={sessionNFTs} />
+          <NFTGallery nfts={sessionNFTs} fetchedAssets={fetchedAssets} isLoading={isAssetsLoading} />
 
         </div>
       </main>

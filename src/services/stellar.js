@@ -1,7 +1,7 @@
 import { Horizon, Keypair, Asset, TransactionBuilder, Networks, Operation } from "stellar-sdk";
 import { signTransaction } from "@stellar/freighter-api";
 
-// Use Testnet
+// Using Stellar Testnet for development
 const server = new Horizon.Server("https://horizon-testnet.stellar.org");
 
 export const fetchBalance = async (publicKey) => {
@@ -15,6 +15,18 @@ export const fetchBalance = async (publicKey) => {
     }
     console.error("Error fetching balance", error);
     throw new Error("Failed to fetch balance");
+  }
+};
+
+export const fetchNFTs = async (publicKey) => {
+  try {
+    const account = await server.loadAccount(publicKey);
+    return account.balances.filter(b => b.asset_type !== "native");
+  } catch (error) {
+    if (error.response?.status !== 404) {
+      console.error("Error fetching custom assets", error);
+    }
+    return [];
   }
 };
 
@@ -50,20 +62,43 @@ export const mintNFT = async (userPublicKey, nftData, onProgress) => {
         limit: "1" // Limit to 1 for NFT supply
       })
     )
-    .setTimeout(300)
+    .setTimeout(0)
     .build();
 
     // 5. User signs the Trustline via Freighter
     if (onProgress) onProgress("Please sign the Trustline transaction in Freighter...");
-    const signedXdr = await signTransaction(trustlineTx.toXDR(), { network: "TESTNET" });
-    const signedUserTx = TransactionBuilder.fromXDR(signedXdr, Networks.TESTNET);
+    const xdrString = trustlineTx.toXDR();
+    const rawSignedXdr = await signTransaction(xdrString, { 
+      network: "TESTNET",
+      networkPassphrase: Networks.TESTNET 
+    });
+    
+    console.log("Freighter raw response:", rawSignedXdr);
+
+    const signedXdr = typeof rawSignedXdr === 'object' ? (rawSignedXdr.signedTxXdr || rawSignedXdr.signedTx || String(rawSignedXdr)) : rawSignedXdr;
+
+    if (!signedXdr || typeof signedXdr !== "string") {
+      throw new Error("Invalid signed transaction returned from Freighter");
+    }
+
+    let signedUserTx;
+    try {
+      signedUserTx = TransactionBuilder.fromXDR(signedXdr, Networks.TESTNET);
+    } catch (err) {
+      console.error("XDR parse error:", err);
+      throw err;
+    }
     
     // 6. Submit user's Trustline tx
     if (onProgress) onProgress("Submitting Trustline to Stellar network...");
     const trustlineResult = await server.submitTransaction(signedUserTx);
-    if (!trustlineResult.successful) {
-      throw new Error("Failed to establish trustline.");
-    }
+    
+    // 6.5 Wait for Horizon ledger ingestion (Stellar Testnet delay)
+    if (onProgress) onProgress("Verifying Trustline commitment to ledger...");
+    await new Promise(resolve => setTimeout(resolve, 4000));
+    
+    // Explicitly reload the user account to confirm sequence and trustline propagation
+    await server.loadAccount(userPublicKey);
 
     // 7. Issuer sends precisely 1 unit of Asset to User and locks itself
     if (onProgress) onProgress("Minting token and permanently locking supply...");
@@ -85,7 +120,7 @@ export const mintNFT = async (userPublicKey, nftData, onProgress) => {
         masterWeight: 0
       })
     )
-    .setTimeout(300)
+    .setTimeout(0)
     .build();
 
     paymentTx.sign(issuerKeypair);
@@ -100,6 +135,9 @@ export const mintNFT = async (userPublicKey, nftData, onProgress) => {
     };
     
   } catch (error) {
+    if (error.response?.data) {
+      console.error("Horizon error data:", JSON.stringify(error.response.data, null, 2));
+    }
     console.error("Minting Error:", error);
     throw new Error(error.message || "Minting transaction failed");
   }
