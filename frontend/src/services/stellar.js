@@ -1,18 +1,22 @@
-import { Horizon, Keypair, Asset, TransactionBuilder, Networks, Operation } from "stellar-sdk";
+import { Horizon, rpc, TransactionBuilder, Networks, Contract, Address, nativeToScVal, scValToNative } from "stellar-sdk";
 import { signTransaction } from "@stellar/freighter-api";
 
-// Using Stellar Testnet for development
-const server = new Horizon.Server("https://horizon-testnet.stellar.org");
+// Using Stellar Testnet
+const horizonServer = new Horizon.Server("https://horizon-testnet.stellar.org");
+const sorobanServer = new rpc.Server("https://soroban-testnet.stellar.org");
+
+// Contract constants
+export const NFT_CONTRACT_ID = "CANFTXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+export const METADATA_CONTRACT_ID = "CAMETAXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
+export const TOKEN_CONTRACT_ID = "CATOKENXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX";
 
 export const fetchBalance = async (publicKey) => {
   try {
-    const account = await server.loadAccount(publicKey);
+    const account = await horizonServer.loadAccount(publicKey);
     const nativeBalance = account.balances.find(b => b.asset_type === "native");
     return nativeBalance ? nativeBalance.balance : "0.0000000";
   } catch (error) {
-    if (error.response && error.response.status === 404) {
-      return "0.0000000"; // Unfunded account
-    }
+    if (error.response && error.response.status === 404) return "0.0000000";
     console.error("Error fetching balance", error);
     throw new Error("Failed to fetch balance");
   }
@@ -20,11 +24,39 @@ export const fetchBalance = async (publicKey) => {
 
 export const fetchNFTs = async (publicKey) => {
   try {
-    const account = await server.loadAccount(publicKey);
-    return account.balances.filter(b => b.asset_type !== "native");
+     const contract = new Contract(NFT_CONTRACT_ID);
+     const account = await horizonServer.loadAccount(publicKey);
+     const txBuilder = new TransactionBuilder(account, { fee: "100", networkPassphrase: Networks.TESTNET });
+     
+     // Build pure RPC fetch call mapping Address native format
+     const op = contract.call(
+         "get_owner_nfts", 
+         nativeToScVal(publicKey, { type: "address" })
+     );
+     
+     txBuilder.addOperation(op).setTimeout(30);
+     const tx = txBuilder.build();
+     
+     const request = await sorobanServer.simulateTransaction(tx);
+     
+     if (request.results && request.results[0]) {
+         const nfts = scValToNative(request.results[0].retval);
+         // Transform pure blockchain arrays into standard view formats smoothly
+         return (nfts || []).map(tokenId => ({
+             asset_code: `TOKEN #${tokenId}`,
+             asset_issuer: NFT_CONTRACT_ID,
+             balance: "1",
+             metadata: {
+                 name: `SOROBAN NFT #${tokenId}`,
+                 description: "Fetched dynamically from Soroban RPC",
+                 imageUrl: "" // Metadata requires further dynamic chaining normally
+             }
+         }));
+     }
+     return [];
   } catch (error) {
     if (error.response?.status !== 404) {
-      console.error("Error fetching custom assets", error);
+      console.error("Soroban RPC fetch error", error);
     }
     return [];
   }
@@ -32,114 +64,74 @@ export const fetchNFTs = async (publicKey) => {
 
 export const mintNFT = async (userPublicKey, nftData, onProgress) => {
   try {
-    // 1. Create a dedicated issuer account for this NFT
-    if (onProgress) onProgress("Initializing issuer account...");
-    const issuerKeypair = Keypair.random();
+    if (onProgress) onProgress("Initializing Soroban contract invocation...");
+    const account = await horizonServer.loadAccount(userPublicKey);
     
-    // 2. Fund the issuer keypair using Friendbot (Testnet only)
-    if (onProgress) onProgress("Funding issuer via Testnet Friendbot...");
-    const fbResponse = await fetch(`https://friendbot.stellar.org?addr=${issuerKeypair.publicKey()}`);
-    if (!fbResponse.ok) {
-      throw new Error("Failed to fund issuer account on Testnet.");
-    }
-
-    // 3. Define the NFT asset code
-    let assetCode = nftData.name.replace(/[^a-zA-Z0-9]/g, '').slice(0, 12).toUpperCase();
-    if (!assetCode) assetCode = "NFT";
+    const contract = new Contract(NFT_CONTRACT_ID);
     
-    const nftAsset = new Asset(assetCode, issuerKeypair.publicKey());
-
-    // 4. Build Trustline transaction for the User
-    if (onProgress) onProgress("Preparing Trustline transaction...");
-    const userAccount = await server.loadAccount(userPublicKey);
-    const trustlineTx = new TransactionBuilder(userAccount, {
-      fee: await server.fetchBaseFee(),
+    // Explicit dynamic contract mapping pushing arguments across matching Native types smoothly
+    const op = contract.call(
+      "mint_nft",
+      nativeToScVal(userPublicKey, { type: "address" }),
+      nativeToScVal(nftData.name, { type: "string" }),
+      nativeToScVal(nftData.imageUrl || nftData.description, { type: "string" }),
+      nativeToScVal(METADATA_CONTRACT_ID, { type: "address" }),
+      nativeToScVal(TOKEN_CONTRACT_ID, { type: "address" })
+    );
+    
+    let tx = new TransactionBuilder(account, {
+      fee: "1000",
       networkPassphrase: Networks.TESTNET
     })
-    .addOperation(
-      Operation.changeTrust({
-        asset: nftAsset,
-        limit: "1" // Limit to 1 for NFT supply
-      })
-    )
-    .setTimeout(0)
+    .addOperation(op)
+    .setTimeout(30)
     .build();
-
-    // 5. User signs the Trustline via Freighter
-    if (onProgress) onProgress("Please sign the Trustline transaction in Freighter...");
-    const xdrString = trustlineTx.toXDR();
+    
+    if (onProgress) onProgress("Preparing generic transaction execution footprint...");
+    const preparedTx = await sorobanServer.prepareTransaction(tx);
+    
+    if (onProgress) onProgress("Please authorize Soroban execution securely via Freighter...");
+    const xdrString = preparedTx.toXDR();
     const rawSignedXdr = await signTransaction(xdrString, { 
       network: "TESTNET",
       networkPassphrase: Networks.TESTNET 
     });
     
-    console.log("Freighter raw response:", rawSignedXdr);
-
     const signedXdr = typeof rawSignedXdr === 'object' ? (rawSignedXdr.signedTxXdr || rawSignedXdr.signedTx || String(rawSignedXdr)) : rawSignedXdr;
-
-    if (!signedXdr || typeof signedXdr !== "string") {
-      throw new Error("Invalid signed transaction returned from Freighter");
-    }
-
-    let signedUserTx;
-    try {
-      signedUserTx = TransactionBuilder.fromXDR(signedXdr, Networks.TESTNET);
-    } catch (err) {
-      console.error("XDR parse error:", err);
-      throw err;
+    const signedUserTx = TransactionBuilder.fromXDR(signedXdr, Networks.TESTNET);
+    
+    if (onProgress) onProgress("Submitting invocation directly to Soroban sequence...");
+    const result = await sorobanServer.sendTransaction(signedUserTx);
+    
+    if (result.status === "ERROR") {
+        throw new Error("RPC transaction execution rejection.");
     }
     
-    // 6. Submit user's Trustline tx
-    if (onProgress) onProgress("Submitting Trustline to Stellar network...");
-    const trustlineResult = await server.submitTransaction(signedUserTx);
+    if (onProgress) onProgress("Syncing network consensus state confirmations...");
     
-    // 6.5 Wait for Horizon ledger ingestion (Stellar Testnet delay)
-    if (onProgress) onProgress("Verifying Trustline commitment to ledger...");
-    await new Promise(resolve => setTimeout(resolve, 4000));
+    let txResult = await sorobanServer.getTransaction(result.hash);
+    let attempts = 0;
+    while (txResult.status === "NOT_FOUND" && attempts < 15) {
+        await new Promise(r => setTimeout(r, 2000));
+        txResult = await sorobanServer.getTransaction(result.hash);
+        attempts++;
+    }
     
-    // Explicitly reload the user account to confirm sequence and trustline propagation
-    await server.loadAccount(userPublicKey);
-
-    // 7. Issuer sends precisely 1 unit of Asset to User and locks itself
-    if (onProgress) onProgress("Minting token and permanently locking supply...");
-    const issuerAccount = await server.loadAccount(issuerKeypair.publicKey());
-    const paymentTx = new TransactionBuilder(issuerAccount, {
-      fee: await server.fetchBaseFee(),
-      networkPassphrase: Networks.TESTNET
-    })
-    .addOperation(
-      Operation.payment({
-        destination: userPublicKey,
-        asset: nftAsset,
-        amount: "1" // Supply 1
-      })
-    )
-    .addOperation(
-      // Lock account to ensure supply stays perfectly at 1
-      Operation.setOptions({
-        masterWeight: 0
-      })
-    )
-    .setTimeout(0)
-    .build();
-
-    paymentTx.sign(issuerKeypair);
-    const paymentResult = await server.submitTransaction(paymentTx);
+    if (txResult.status !== "SUCCESS") {
+        throw new Error(`Transaction state failure natively mapping: ${txResult.status}`);
+    }
 
     return {
       success: true,
-      hash: paymentResult.hash,
-      assetCode,
-      issuer: issuerKeypair.publicKey(),
-      data: nftData // Metadata JSON passed directly into frontend
+      hash: result.hash,
+      assetCode: nftData.name,
+      issuer: NFT_CONTRACT_ID,
+      data: nftData
     };
     
   } catch (error) {
-    if (error.response?.data) {
-      console.error("Horizon error data:", JSON.stringify(error.response.data, null, 2));
-    }
     console.error("Minting Error:", error);
-    throw new Error(error.message || "Minting transaction failed");
+    throw new Error(error.message || "Minting transaction permanently failed");
   }
 };
 
