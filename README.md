@@ -99,6 +99,4 @@ This application demonstrates the complete lifecycle of minting an NFT on the St
 
 ## 🎥 Demo Video
 
-*(Link a brief embedded live demo capture prototype explicitly directly utilizing markdown image bindings natively linked directly wrapping your external host parameter URL identically inside markdown anchors!)*
-
-[![Demo Embed Video Prototype Layout](https://img.youtube.com/vi/YOUR_VIDEO_ID/hqdefault.jpg)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
+[Watch the live demo of the application on Google Drive](https://drive.google.com/file/d/1ha3iNN5S5b1NO9Mq64zI-YUUSHlXP5sy/view?usp=drive_link)
