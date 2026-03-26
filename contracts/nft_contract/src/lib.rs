@@ -23,8 +23,17 @@ pub struct NftContract;
 
 #[contractimpl]
 impl NftContract {
-    pub fn mint_nft(env: Env, to: Address, name: String, metadata_uri: String, metadata_contract: Address) -> u64 {
+    pub fn mint_nft(env: Env, to: Address, name: String, metadata_uri: String, metadata_contract: Address, token_contract: Address) -> u64 {
         to.require_auth();
+        
+        // --- NFT Minting Payment ---
+        // Require a 10 VIBE fee to be strictly transferred from the minting user mapping to this contract.
+        // Cleanly separate token tracking logic utilizing standard dynamic cross-invocations.
+        let fee_amount: i128 = 10;
+        let contract_address = env.current_contract_address();
+        
+        let token_args = soroban_sdk::vec![&env, to.into_val(&env), contract_address.into_val(&env), fee_amount.into_val(&env)];
+        env.invoke_contract::<()>(&token_contract, &Symbol::new(&env, "transfer"), token_args);
         
         let mut count: u64 = env.storage().persistent().get(&DataKey::TokenCount).unwrap_or(0);
         count += 1;
@@ -127,11 +136,23 @@ mod test {
             env.storage().persistent().set(&token_id, &uri);
         }
     }
+    
+    // Abstract Token Mock logically mapping identical parameter layouts safely
+    #[contract]
+    pub struct MockTokenContract;
+
+    #[contractimpl]
+    impl MockTokenContract {
+        pub fn transfer(_env: Env, _from: Address, _to: Address, _amount: i128) {
+            // Standard simulated dummy return 
+        }
+    }
 
     #[test]
     fn test_mint() {
         let env = Env::default();
         let meta_id = env.register_contract(None, MockMetadataContract);
+        let token_id_addr = env.register_contract(None, MockTokenContract);
         let contract_id = env.register_contract(None, NftContract);
         let client = NftContractClient::new(&env, &contract_id);
         
@@ -142,7 +163,7 @@ mod test {
         env.mock_all_auths();
         
         // Dynamic cross invocation
-        let token_id = client.mint_nft(&user, &name, &uri, &meta_id);
+        let token_id = client.mint_nft(&user, &name, &uri, &meta_id, &token_id_addr);
         assert_eq!(token_id, 1);
         
         let nft = client.get_nft(&token_id);
@@ -159,6 +180,7 @@ mod test {
     fn test_transfer() {
         let env = Env::default();
         let meta_id = env.register_contract(None, MockMetadataContract);
+        let token_id_addr = env.register_contract(None, MockTokenContract);
         let contract_id = env.register_contract(None, NftContract);
         let client = NftContractClient::new(&env, &contract_id);
         
@@ -169,7 +191,7 @@ mod test {
 
         env.mock_all_auths();
         
-        let token_id = client.mint_nft(&user1, &name, &uri, &meta_id);
+        let token_id = client.mint_nft(&user1, &name, &uri, &meta_id, &token_id_addr);
         client.transfer_nft(&user1, &user2, &token_id);
         
         let nft = client.get_nft(&token_id);
@@ -197,6 +219,7 @@ mod test {
     fn test_transfer_unathorized() {
         let env = Env::default();
         let meta_id = env.register_contract(None, MockMetadataContract);
+        let token_id_addr = env.register_contract(None, MockTokenContract);
         let contract_id = env.register_contract(None, NftContract);
         let client = NftContractClient::new(&env, &contract_id);
         
@@ -208,7 +231,7 @@ mod test {
 
         env.mock_all_auths();
         
-        let token_id = client.mint_nft(&user1, &name, &uri, &meta_id);
+        let token_id = client.mint_nft(&user1, &name, &uri, &meta_id, &token_id_addr);
         client.transfer_nft(&user2, &user3, &token_id);
     }
 }
