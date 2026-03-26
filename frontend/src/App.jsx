@@ -102,14 +102,14 @@ function App() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <header className="min-h-[80px] flex items-center justify-between px-6 md:px-12 xl:px-[5%] border-b border-white/10 bg-[#0d0e12]/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="flex items-center gap-3">
-          <div className="bg-gradient-to-br from-stellar to-[#6c5ce7] p-2 rounded-xl flex items-center justify-center">
-            <Rocket size={24} className="text-black" />
+      <header className="min-h-[70px] sm:min-h-[80px] flex items-center justify-between px-4 sm:px-6 md:px-12 xl:px-[5%] border-b border-white/10 bg-[#0d0e12]/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="bg-gradient-to-br from-stellar to-[#6c5ce7] p-1.5 sm:p-2 rounded-lg sm:rounded-xl flex items-center justify-center shrink-0">
+            <Rocket size={20} className="text-black sm:w-6 sm:h-6" />
           </div>
-          <div>
-            <h1 className="text-xl font-semibold m-0 text-gradient leading-tight">Stellar Mint</h1>
-            <div className="text-xs text-gray-400">NFT Generator</div>
+          <div className="flex flex-col">
+            <h1 className="text-lg sm:text-xl font-semibold m-0 text-gradient leading-tight">Stellar Mint</h1>
+            <div className="text-[10px] sm:text-xs text-gray-400">NFT Generator</div>
           </div>
         </div>
 
@@ -117,30 +117,30 @@ function App() {
           {!publicKey ? (
             <ConnectWallet onConnect={handleConnect} />
           ) : (
-            <div className="flex items-center gap-3">
-               <div className="bg-white/5 border border-white/10 text-white px-4 py-2 rounded-lg font-medium text-sm animate-fade-in cursor-default">
+            <div className="flex items-center gap-2 sm:gap-3">
+               <div className="bg-white/5 border border-white/10 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-xs sm:text-sm animate-fade-in cursor-default whitespace-nowrap hidden sm:block">
                  Connected
                </div>
                <button 
                  onClick={handleDisconnect} 
-                 className="bg-white/5 border border-white/10 hover:bg-white/10 text-white p-2.5 rounded-lg transition-colors animate-fade-in"
+                 className="bg-white/5 border border-white/10 hover:bg-white/10 text-white p-2 sm:p-2.5 rounded-lg transition-colors animate-fade-in flex items-center justify-center"
                  title="Disconnect"
                >
-                 <LogOut size={18} />
+                 <LogOut size={16} className="sm:w-[18px] sm:h-[18px]" />
                </button>
             </div>
           )}
         </div>
       </header>
 
-      <main className="flex-1 px-6 py-12 md:py-16 xl:px-[5%] flex flex-col items-center">
-        <div className="w-full max-w-4xl flex flex-col items-center gap-10">
+      <main className="flex-1 px-4 sm:px-6 py-8 md:py-16 xl:px-[5%] flex flex-col items-center">
+        <div className="w-full max-w-4xl flex flex-col items-center gap-8 sm:gap-10">
           
-          <div className="text-center">
-            <h2 className="text-4xl md:text-5xl font-bold mb-4">
+          <div className="text-center px-2">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">
               Mint on <span className="text-gradient-primary">Stellar</span>
             </h2>
-            <p className="text-gray-400 text-lg max-w-lg mx-auto leading-relaxed">
+            <p className="text-gray-400 text-sm sm:text-lg max-w-lg mx-auto leading-relaxed">
               Create, verify, and launch your non-fungible tokens on the open network.
             </p>
           </div>
