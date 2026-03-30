@@ -104,7 +104,9 @@ export const mintNFT = async (userPublicKey, nftData, onProgress) => {
     const result = await sorobanServer.sendTransaction(signedUserTx);
 
     if (result.status === "ERROR") {
-      throw new Error("RPC transaction execution rejection.");
+      console.error("RPC Full Reject Trace:", result);
+      const trace = result.errorResultXdr || JSON.stringify(result);
+      throw new Error(`RPC transaction execution rejection: ${trace}`);
     }
 
     if (onProgress) onProgress("Syncing network consensus state confirmations...");
