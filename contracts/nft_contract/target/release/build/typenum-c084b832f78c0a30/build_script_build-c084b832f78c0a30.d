@@ -1,0 +1,5 @@
+C:\Users\aaxon\Documents\stellar\stellar-nft-minter\contracts\nft_contract\target\release\build\typenum-c084b832f78c0a30\build_script_build-c084b832f78c0a30.d: C:\Users\aaxon\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\typenum-1.19.0\build.rs
+
+C:\Users\aaxon\Documents\stellar\stellar-nft-minter\contracts\nft_contract\target\release\build\typenum-c084b832f78c0a30\build_script_build-c084b832f78c0a30.exe: C:\Users\aaxon\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\typenum-1.19.0\build.rs
+
+C:\Users\aaxon\.cargo\registry\src\index.crates.io-1949cf8c6b5b557f\typenum-1.19.0\build.rs:

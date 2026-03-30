@@ -1,0 +1,1 @@
+C:\Users\aaxon\Documents\stellar\stellar-nft-minter\contracts\metadata_contract\target\wasm32-unknown-unknown\release\soroban_metadata_contract.wasm: C:\Users\aaxon\Documents\stellar\stellar-nft-minter\contracts\metadata_contract\src\lib.rs

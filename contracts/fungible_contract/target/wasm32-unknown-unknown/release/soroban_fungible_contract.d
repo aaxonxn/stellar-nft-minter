@@ -1,0 +1,1 @@
+C:\Users\aaxon\Documents\stellar\stellar-nft-minter\contracts\fungible_contract\target\wasm32-unknown-unknown\release\soroban_fungible_contract.wasm: C:\Users\aaxon\Documents\stellar\stellar-nft-minter\contracts\fungible_contract\src\lib.rs
