@@ -27,19 +27,19 @@ jobs:
         run: |
           cd contracts/nft_contract
           cargo build --release
-          cargo test
+          cargo test --target x86_64-unknown-linux-gnu
 
       - name: Metadata Contract Build & Test
         run: |
           cd contracts/metadata_contract
           cargo build --release
-          cargo test
+          cargo test --target x86_64-unknown-linux-gnu
 
       - name: Token Contract Build & Test
         run: |
           cd contracts/fungible_contract
           cargo build --release
-          cargo test
+          cargo test --target x86_64-unknown-linux-gnu
 
       - name: Frontend Build & Test
         run: |
