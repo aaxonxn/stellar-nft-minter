@@ -91,17 +91,35 @@ Check out the live deployment securely operating over global CDN endpoints here:
 
 ## 📸 Screenshots
 
-### 💻 Desktop Wallet Integration
-![Desktop Platform View](/assets/desktop.png)
+> 📱 Fully responsive UI tested across mobile and desktop environments.
 
-### 📱 Responsive Mobile Target
-![Mobile Layout Prototype](/assets/mobile.png)
+### 📱 Mobile Experience
 
-### 🖼 NFT Gallery
-![Gallery Render View](/assets/gallery.png)
+#### Wallet Connection
+![Wallet Connection](./assets/mobile1-connect.png)
 
-### 🚀 Minting Experience
-![Mint Progress View](/assets/mint.png)
+#### Transaction Processing
+![Transaction Processing](./assets/mobile2-processing.png)
+
+#### NFT Mint Success
+![NFT Mint Success](./assets/mobile3-minted.png)
+
+### 💻 Desktop Experience
+
+#### Wallet Not Connected
+![Wallet Not Connected](./assets/screen1-wallet.png)
+
+#### Wallet Connected
+![Wallet Connected](./assets/screen2-connected.png)
+
+#### Minting in Progress
+![Minting in Progress](./assets/screen3-minting.png)
+
+#### NFT Mint Success
+![NFT Mint Success](./assets/screen4-success.png)
+
+#### NFT Gallery View
+![NFT Gallery View](./assets/screen5-gallery.png)
 
 ---
 
