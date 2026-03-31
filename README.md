@@ -1,6 +1,6 @@
 # Stellar NFT Minter
 
-![CI/CD](https://github.com/aaxonxn/stellar-nft-minter/actions/workflows/main.yml/badge.svg)
+[![CI Pipeline](https://github.com/aaxonxn/stellar-nft-minter/actions/workflows/main.yml/badge.svg)](https://github.com/aaxonxn/stellar-nft-minter/actions/workflows/main.yml)
 [![Deploy Platform](https://img.shields.io/badge/deploy-vercel-black.svg?style=flat-square)](#)
 
 🚀 **Stellar NFT Minter** is a professional decentralized application (dApp) built on the robust Soroban smart contract platform. It enables users to securely mint Non-Fungible Tokens (NFTs) while leveraging an advanced, componentized smart contract architecture on the Stellar network.
