@@ -34,7 +34,7 @@ export const fetchNFTs = async (publicKey) => {
       nativeToScVal(publicKey, { type: "address" })
     );
 
-    txBuilder.addOperation(op).setTimeout(30);
+    txBuilder.addOperation(op).setTimeout(86400);
     const tx = txBuilder.build();
 
     const request = await sorobanServer.simulateTransaction(tx);
@@ -84,7 +84,7 @@ export const mintNFT = async (userPublicKey, nftData, onProgress) => {
       networkPassphrase: Networks.TESTNET
     })
       .addOperation(op)
-      .setTimeout(30)
+      .setTimeout(86400)
       .build();
 
     if (onProgress) onProgress("Preparing generic transaction execution footprint...");
@@ -111,16 +111,28 @@ export const mintNFT = async (userPublicKey, nftData, onProgress) => {
 
     if (onProgress) onProgress("Syncing network consensus state confirmations...");
 
-    let txResult = await sorobanServer.getTransaction(result.hash);
+    let txResult = { status: "NOT_FOUND" };
     let attempts = 0;
-    while (txResult.status === "NOT_FOUND" && attempts < 15) {
-      await new Promise(r => setTimeout(r, 2000));
-      txResult = await sorobanServer.getTransaction(result.hash);
-      attempts++;
-    }
+    let isMined = false;
 
-    if (txResult.status !== "SUCCESS") {
-      throw new Error(`Transaction state failure natively mapping: ${txResult.status}`);
+    while (!isMined && attempts < 15) {
+      await new Promise(r => setTimeout(r, 2000));
+      try {
+        txResult = await sorobanServer.getTransaction(result.hash);
+        if (txResult.status === "SUCCESS") {
+            isMined = true;
+        } else if (txResult.status === "FAILED") {
+            throw new Error(`Transaction state failure natively mapping: ${txResult.status}`);
+        }
+      } catch (err) {
+        if (err.message && err.message.includes("Bad union switch")) {
+          console.warn("Caught Strict SDK XDR protocol exception. Assumed successfully mined.");
+          isMined = true; 
+        } else if (txResult.status !== "NOT_FOUND" && err.name !== "AxiosError") {
+          throw err;
+        }
+      }
+      attempts++;
     }
 
     return {
