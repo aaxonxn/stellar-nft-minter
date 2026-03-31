@@ -38,8 +38,8 @@ export const fetchNFTs = async (publicKey) => {
 
     const request = await sorobanServer.simulateTransaction(tx);
 
-    if (request.results && request.results[0]) {
-      const nfts = scValToNative(request.results[0].retval);
+    if (request.result) {
+      const nfts = scValToNative(request.result.retval);
       const tokenIds = nfts || [];
       const metaContract = new Contract(METADATA_CONTRACT_ID);
       
@@ -52,8 +52,8 @@ export const fetchNFTs = async (publicKey) => {
           const reqMeta = await sorobanServer.simulateTransaction(txBuilderMeta.build());
           
           let imageUrl = "";
-          if (reqMeta.results && reqMeta.results[0]) {
-             imageUrl = scValToNative(reqMeta.results[0].retval);
+          if (reqMeta.result) {
+             imageUrl = scValToNative(reqMeta.result.retval);
           }
           
           return {

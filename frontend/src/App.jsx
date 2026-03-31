@@ -30,7 +30,7 @@ const saveMetadataToStorage = (nft) => {
 };
 
 function App() {
-  const [publicKey, setPublicKey] = useState(null);
+  const [publicKey, setPublicKey] = useState(() => getStoredPublicKey());
   const [balance, setBalance] = useState('0.0000000');
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
   const [fetchedAssets, setFetchedAssets] = useState([]);
@@ -68,13 +68,7 @@ function App() {
     }
   };
 
-  useEffect(() => {
-    const initWallet = async () => {
-      const storedKey = getStoredPublicKey();
-      if (storedKey) setPublicKey(storedKey);
-    };
-    initWallet();
-  }, []);
+  // Synced local init entirely avoids screen flash during refreshes natively
 
   useEffect(() => {
     if (publicKey) {
@@ -116,7 +110,7 @@ function App() {
             <ConnectWallet onConnect={handleConnect} />
           ) : (
             <div className="flex items-center gap-2 sm:gap-3">
-               <div className="bg-white/5 border border-white/10 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-xs sm:text-sm animate-fade-in cursor-default whitespace-nowrap hidden sm:block">
+               <div className="bg-stellar/10 border border-stellar/20 text-stellar px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium text-[10px] sm:text-sm animate-fade-in cursor-default whitespace-nowrap shadow-[0_0_10px_rgba(20,212,244,0.1)]">
                  Connected
                </div>
                <button 
