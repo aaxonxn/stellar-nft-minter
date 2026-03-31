@@ -28,7 +28,6 @@ export const fetchNFTs = async (publicKey) => {
     const account = await horizonServer.loadAccount(publicKey);
     const txBuilder = new TransactionBuilder(account, { fee: "100", networkPassphrase: Networks.TESTNET });
 
-    // Build pure RPC fetch call mapping Address native format
     const op = contract.call(
       "get_owner_nfts",
       nativeToScVal(publicKey, { type: "address" })
@@ -41,17 +40,38 @@ export const fetchNFTs = async (publicKey) => {
 
     if (request.results && request.results[0]) {
       const nfts = scValToNative(request.results[0].retval);
-      // Transform pure blockchain arrays into standard view formats smoothly
-      return (nfts || []).map(tokenId => ({
-        asset_code: `TOKEN #${tokenId}`,
-        asset_issuer: NFT_CONTRACT_ID,
-        balance: "1",
-        metadata: {
-          name: `SOROBAN NFT #${tokenId}`,
-          description: "Fetched dynamically from Soroban RPC",
-          imageUrl: "" // Metadata requires further dynamic chaining normally
+      const tokenIds = nfts || [];
+      const metaContract = new Contract(METADATA_CONTRACT_ID);
+      
+      const fetchedNFTs = await Promise.all(tokenIds.map(async (tId) => {
+        const tokenId = BigInt(tId);
+        try {
+          const opMeta = metaContract.call("get_metadata", nativeToScVal(tokenId, { type: "u64" }));
+          const txBuilderMeta = new TransactionBuilder(account, { fee: "100", networkPassphrase: Networks.TESTNET });
+          txBuilderMeta.addOperation(opMeta).setTimeout(86400);
+          const reqMeta = await sorobanServer.simulateTransaction(txBuilderMeta.build());
+          
+          let imageUrl = "";
+          if (reqMeta.results && reqMeta.results[0]) {
+             imageUrl = scValToNative(reqMeta.results[0].retval);
+          }
+          
+          return {
+             asset_code: `TOKEN #${tokenId.toString()}`,
+             asset_issuer: NFT_CONTRACT_ID,
+             balance: "1",
+             metadata: {
+               name: `Asset #${tokenId.toString()}`,
+               description: "Stellar Contract Token",
+               imageUrl: imageUrl
+             }
+          }
+        } catch (e) {
+          console.error("Error evaluating Soroban mapping bounds", e);
+          return null;
         }
       }));
+      return fetchedNFTs.filter(Boolean).reverse();
     }
     return [];
   } catch (error) {

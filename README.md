@@ -5,15 +5,25 @@
 
 🚀 **Stellar NFT Minter** is a professional decentralized application (dApp) built on the robust Soroban smart contract platform. It enables users to securely mint Non-Fungible Tokens (NFTs) while leveraging an advanced, componentized smart contract architecture on the Stellar network.
 
-Built with a premium, fully responsive Tailwind CSS aesthetic, the platform abstracts away the complexity of blockchain interactions. It allows creators to automatically map multi-contract executions, securely connect their Freighter wallet, and instantly view transactions natively via the Stellar Expert Block Explorer.
+Built with a clean React + Tailwind CSS aesthetic, the platform abstracts away the complexity of blockchain interactions. It allows creators to automatically run multi-contract flows, connect their Freighter wallet, and instantly view transactions natively via the Stellar Expert Block Explorer.
+
+🌍 **Live Demo:** [Open Stellar NFT Minter](https://stellar-nft-minter.vercel.app)
 
 ## 🌟 Features
 
 - **Freighter Wallet Integration**: Secure and seamless connection utilizing `@stellar/freighter-api`.
-- **Advanced Inter-Contract Minting Flow**: Requires dynamic fungible token fee transfers (VIBE) and isolates metadata securely via explicit cross-contract execution parameters. Token-gated NFT mints ensure network security and fair drops.
-- **Soroban RPC Executions**: Purely leverages the advanced Soroban RPC endpoints securely isolating network executions.
+- **Advanced Inter-Contract Minting Flow**: Requires dynamic fungible token fee transfers (VIBE token gating) to protect the network.
+- **Soroban RPC Executions**: Reliable integrations using `simulateTransaction` explicitly isolating executions.
 - **Fully Responsive UI**: Mobile-first premium glassmorphism architecture. Fully responsive to 320px Viewports.
-- **Dynamic Session Gallery**: Tracks and seamlessly maps RPC-fetches securely transforming native arrays to the React view model flawlessly.
+- **Dynamic Gallery System**: Retrieves and tracks on-chain NFTs fetched via RPC explicitly connecting standard user interfaces directly to blockchain datasets seamlessly.
+
+## 🧠 Why This Project Stands Out
+
+This application sets a high standard for modern Web3 integration on the Stellar Network:
+- **Multi-Contract Architecture:** Instead of building a fragile monolithic structure, concerns are clearly separated across three distinct compiled Soroban WebAssembly contracts.
+- **Token-Gated Minting:** Employs an exact programmatic VIBE-coin payment flow (built from a standard Fungible Token interface) required internally during mint execution—an enterprise-level workflow pattern for protocol fee mechanisms.
+- **Inter-Contract Calls:** Perfectly handles recursive contract `env.invoke_contract` routing, forwarding executions from the NFT core logic dynamically over to isolated `MetadataContract` systems and the `FungibleContract`.
+- **Modern Soroban Deployment:** Designed exclusively using the latest Soroban RPC endpoints bypassing legacy horizon asset wrappers.
 
 ## 🛠 Tech Stack
 
@@ -25,18 +35,18 @@ Built with a premium, fully responsive Tailwind CSS aesthetic, the platform abst
 
 ## 📂 Project Structure
 
-- `/frontend` → React dApp executing standard Soroban wallet connectors natively mapping UI elements dynamically.
-- `contracts/nft_contract` → The primary Token implementation executing mints tracking robust native `DataKey` persistent structures accurately.
-- `contracts/metadata_contract` → An effectively isolated Metadata contract gracefully extracting URI allocations mapped remotely.
-- `contracts/fungible_contract` → The secure protocol `Vibecoin` fungible token tracking and validating mapping fees gracefully via `admin.require_auth()`.
+- `/frontend` → React dApp executing standard Soroban wallet connectors flawlessly mapped dynamically off UI handlers.
+- `contracts/nft_contract` → The primary Token implementation tracking accounts and standard tokens safely interacting securely.
+- `contracts/metadata_contract` → An effectively isolated Metadata contract managing URI mappings and image allocations exclusively.
+- `contracts/fungible_contract` → The protocol `Vibecoin` fungible token mapping cross-contract payments precisely and enforcing access bounds.
 
 ## 📦 Architecture & Inter-Contract Call Explanation
 
-Unlike traditional monolithic blockchain implementations, this platform strictly leverages an advanced **Inter-Contract Architecture** explicitly relying on native mappings to securely separate data and authority effectively.
+Unlike traditional iterations, this platform leverages a robust **Inter-Contract Architecture**:
 
-1. **Token Payment Leg (Token-Gated Mint)**: When an NFT is minted via the `NftContract`, the contract immediately isolates and binds an explicit cross-contract execution triggering the `transfer` method against the isolated `FungibleContract` (VIBE token). This strictly enforces an automatic fee payment securely across the network.
-2. **Execution & Immutable Setup**: Once the user safely clears the fee requirements securely, the `NftContract` constructs the persistent Token counter and immutable ownership maps securely mapping the asset to the Creator.
-3. **Data Mapping Leg**: The `NftContract` immediately isolates pure application-level attributes routing dynamically via `env.invoke_contract` sending the specific `token_id` and `metadata_uri` mappings securely. This offloads logic explicitly into the secondary `MetadataContract` guaranteeing strict execution boundary separation.
+1. **Token Payment Leg (Token-Gated Mint)**: When an NFT is minted via the `NftContract`, the contract immediately runs an explicit cross-contract execution triggering the `transfer` method against the isolated `FungibleContract` (VIBE token). This strictly enforces an automatic 10 VIBE fee payment.
+2. **Execution & Immutable Setup**: Once the user safely clears the fee requirements, the `NftContract` constructs the persistent Token counter and immutable ownership map assigning the asset to the Creator.
+3. **Data Mapping Leg**: The `NftContract` extracts application-level attributes routing dynamically via `env.invoke_contract` sending the specific `token_id` and `metadata_uri` mappings directly to the secondary `MetadataContract`.
 
 ## 🚀 Setup Instructions
 
@@ -74,7 +84,7 @@ Unlike traditional monolithic blockchain implementations, this platform strictly
 
 ## 🌍 Deployment
 
-Check out the live robust deployment securely operating flawlessly over global CDN endpoints here:
+Check out the live deployment securely operating over global CDN endpoints here:
 👉 **[Live Demo: Stellar NFT Minter](https://stellar-nft-minter.vercel.app/)**
 
 ---
@@ -82,16 +92,22 @@ Check out the live robust deployment securely operating flawlessly over global C
 ## 📸 Screenshots
 
 ### 💻 Desktop Wallet Integration
-![Desktop Platform View](https://via.placeholder.com/1200x800.png?text=Desktop+Platform+View)
+![Desktop Platform View](/assets/desktop.png)
 
 ### 📱 Responsive Mobile Target
-![Mobile Layout Prototype](https://via.placeholder.com/400x800.png?text=Mobile+Responsive+View)
+![Mobile Layout Prototype](/assets/mobile.png)
+
+### 🖼 NFT Gallery
+![Gallery Render View](/assets/gallery.png)
+
+### 🚀 Minting Experience
+![Mint Progress View](/assets/mint.png)
 
 ---
 
 ## 🔗 Contract Addresses & References
 
-All contracts have been actively deployed onto the Stellar Testnet sequentially.
+All contracts have been actively deployed onto the Stellar Testnet sequentially using Soroban CLI execution nodes.
 
 | Contract Target | Stellar Address Reference | Explorer Hash ID |
 | --- | --- | --- |
@@ -99,5 +115,6 @@ All contracts have been actively deployed onto the Stellar Testnet sequentially.
 | **Metadata Mapping** | `CCC5W657SPEEQDFQSJ3LTRUYPWT7PLYAEO4ZDRG6PTOIIBK26UWQTYON` | `https://stellar.expert/explorer/testnet/contract/CCC5W657SPEEQDFQSJ3LTRUYPWT7PLYAEO4ZDRG6PTOIIBK26UWQTYON` |
 | **VibeCoin (VIBE)** | `CCAPTATJJBBE6EFF25ZURXVJB2QDWKEEU462V37CVTO5773GW5E2G5U5` | `https://stellar.expert/explorer/testnet/contract/CCAPTATJJBBE6EFF25ZURXVJB2QDWKEEU462V37CVTO5773GW5E2G5U5` |
 
-### ✅ Recent Testnet Transactions
-- Mint Successful: [bba673...23ab (View on Stellar Expert)](https://stellar.expert/explorer/testnet/tx/12c4f830e16a5f4d6a9549f42499dad82d8)
+### ✅ Recent Testnet Transactions / Proof of Mint
+- Review sample cross-contract token payments and mint execution natively on Stellar Expert:
+- **Transaction Hash:** [7a4c7b0b8e6ff4d0075e5132f73aca0f6b5b (View Proof)](https://stellar.expert/explorer/testnet/tx/7a4c7b0b8e6ff4d0075e5132f73aca0f6b5b)

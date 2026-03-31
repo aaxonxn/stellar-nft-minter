@@ -19,14 +19,12 @@ const getMetadataFromStorage = () => {
 const saveMetadataToStorage = (nft) => {
   const existing = getMetadataFromStorage();
   const newEntry = {
-    asset_code: nft.assetCode,
-    issuer: nft.issuer,
     name: nft.data.name,
     description: nft.data.description,
     imageUrl: nft.data.imageUrl
   };
   
-  if (!existing.some(m => m.asset_code === newEntry.asset_code && m.issuer === newEntry.issuer)) {
+  if (!existing.some(m => m.imageUrl === newEntry.imageUrl && m.name === newEntry.name)) {
     localStorage.setItem(METADATA_KEY, JSON.stringify([newEntry, ...existing]));
   }
 };
@@ -35,55 +33,51 @@ function App() {
   const [publicKey, setPublicKey] = useState(null);
   const [balance, setBalance] = useState('0.0000000');
   const [isBalanceLoading, setIsBalanceLoading] = useState(false);
-  const [sessionNFTs, setSessionNFTs] = useState([]);
   const [fetchedAssets, setFetchedAssets] = useState([]);
   const [isAssetsLoading, setIsAssetsLoading] = useState(false);
 
-  const handleMintSuccess = (nft) => {
-    setSessionNFTs(prev => [nft, ...prev]);
-    saveMetadataToStorage(nft);
+  const fetchWalletData = async () => {
+    if (!publicKey) return;
+    setIsBalanceLoading(true);
+    setIsAssetsLoading(true);
+    try {
+      const bal = await fetchBalance(publicKey);
+      setBalance(bal);
+      
+      const rawAssets = await fetchNFTs(publicKey);
+      const metadataStore = getMetadataFromStorage();
+      
+      const mergedAssets = rawAssets.map(asset => {
+        const meta = metadataStore.find(m => m.imageUrl === asset.metadata.imageUrl || m.name === asset.metadata.name);
+        if (meta) {
+          return { 
+            ...asset, 
+            metadata: { ...asset.metadata, name: meta.name, description: meta.description } 
+          };
+        }
+        return asset;
+      });
+      
+      setFetchedAssets(mergedAssets);
+    } catch (err) {
+      console.error("Data fetch error:", err);
+      setBalance('Error');
+    } finally {
+      setIsBalanceLoading(false);
+      setIsAssetsLoading(false);
+    }
   };
 
   useEffect(() => {
-    // Check if wallet is stored in local storage
     const initWallet = async () => {
       const storedKey = getStoredPublicKey();
-      if (storedKey) {
-        setPublicKey(storedKey);
-      }
+      if (storedKey) setPublicKey(storedKey);
     };
     initWallet();
   }, []);
 
   useEffect(() => {
     if (publicKey) {
-      const fetchWalletData = async () => {
-        setIsBalanceLoading(true);
-        setIsAssetsLoading(true);
-        try {
-          const bal = await fetchBalance(publicKey);
-          setBalance(bal);
-          
-          const rawAssets = await fetchNFTs(publicKey);
-          const metadataStore = getMetadataFromStorage();
-          
-          const mergedAssets = rawAssets.map(asset => {
-            const meta = metadataStore.find(m => m.asset_code === asset.asset_code && m.issuer === asset.asset_issuer);
-            if (meta) {
-              return { ...asset, metadata: meta };
-            }
-            return asset;
-          });
-          
-          setFetchedAssets(mergedAssets);
-        } catch (err) {
-          console.error("Data fetch error:", err);
-          setBalance('Error');
-        } finally {
-          setIsBalanceLoading(false);
-          setIsAssetsLoading(false);
-        }
-      };
       fetchWalletData();
     } else {
       setBalance('0.0000000');
@@ -91,9 +85,13 @@ function App() {
     }
   }, [publicKey]);
 
-  const handleConnect = (key) => {
-    setPublicKey(key);
+  const handleMintSuccess = (nft) => {
+    saveMetadataToStorage(nft);
+    // UX Request: Auto-refresh after mint
+    fetchWalletData();
   };
+
+  const handleConnect = (key) => setPublicKey(key);
 
   const handleDisconnect = () => {
     disconnectWallet();
@@ -135,7 +133,6 @@ function App() {
 
       <main className="flex-1 px-4 sm:px-6 py-8 md:py-16 xl:px-[5%] flex flex-col items-center">
         <div className="w-full max-w-4xl flex flex-col items-center gap-8 sm:gap-10">
-          
           <div className="text-center px-2">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4">
               Mint on <span className="text-gradient-primary">Stellar</span>
@@ -151,7 +148,7 @@ function App() {
             <MintForm publicKey={publicKey} onMintSuccess={handleMintSuccess} />
           </div>
 
-          <NFTGallery nfts={sessionNFTs} fetchedAssets={fetchedAssets} isLoading={isAssetsLoading} />
+          <NFTGallery fetchedAssets={fetchedAssets} isLoading={isAssetsLoading} />
 
         </div>
       </main>
