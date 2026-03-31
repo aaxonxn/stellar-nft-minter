@@ -18,17 +18,32 @@ jobs:
       - name: Add WASM target
         run: rustup target add wasm32-unknown-unknown
 
-      - name: Build NFT Contract
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: NFT Contract Build & Test
         run: |
           cd contracts/nft_contract
           cargo build --release
+          cargo test
 
-      - name: Build Metadata Contract
+      - name: Metadata Contract Build & Test
         run: |
           cd contracts/metadata_contract
           cargo build --release
+          cargo test
 
-      - name: Build Token Contract
+      - name: Token Contract Build & Test
         run: |
           cd contracts/fungible_contract
           cargo build --release
+          cargo test
+
+      - name: Frontend Build & Test
+        run: |
+          cd frontend
+          npm install
+          npm run build
+          npm run test -- --run
